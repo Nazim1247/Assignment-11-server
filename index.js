@@ -27,9 +27,28 @@ async function run() {
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
+    const db = client.db('tutorial-db')
+    const tutorialCollection = db.collection('tutor')
+
+    // save data in the server
+    app.post('/tutorials',async(req,res)=>{
+        const tutorData = req.body;
+        const result = await tutorialCollection.insertOne(tutorData);
+        res.send(result)
+        // console.log(tutorData)
+    })
+
+    // get all tutors
+    app.get('/all-tutors',async(req,res)=>{
+        const result = await tutorialCollection.find().toArray();
+        res.send(result);
+    })
+    
+    
   } finally {
     // Ensures that the client will close when you finish/error
-    await client.close();
+    // await client.close();
   }
 }
 run().catch(console.dir);
