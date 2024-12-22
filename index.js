@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors());
@@ -42,6 +42,22 @@ async function run() {
     // get all tutors
     app.get('/all-tutors',async(req,res)=>{
         const result = await tutorialCollection.find().toArray();
+        res.send(result);
+    })
+
+    // get for tutor details
+    // app.get('/tutor/:id',async(req,rse)=>{
+    //     const id = req.params.id;
+    //     const query = {_id: new ObjectId(id)};
+    //     const result = await tutorialCollection.findOne(query);
+    //     res.send(result);
+    // })
+
+    // get all tutorials posted by user
+    app.get('/tutor/:email',async(req,res)=>{
+        const email = req.params.email;
+        const query = {'tutor.email': email};
+        const result = await tutorialCollection.find(query).toArray();
         res.send(result);
     })
     
