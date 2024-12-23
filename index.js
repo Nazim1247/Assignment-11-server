@@ -30,7 +30,17 @@ async function run() {
 
     const db = client.db('tutorial-db')
     const tutorialCollection = db.collection('tutor')
+    const bookCollection = db.collection('book')
 
+    // save book in the server
+    app.post('/add-book',async(req,res)=>{
+        const bookData = req.body;
+        const result = await bookCollection.insertOne(bookData);
+        res.send(result)
+        // console.log(tutorData)
+    })
+
+    
     // save data in the server
     app.post('/tutorials',async(req,res)=>{
         const tutorData = req.body;
@@ -58,6 +68,36 @@ async function run() {
         const email = req.params.email;
         const query = {'tutor.email': email};
         const result = await tutorialCollection.find(query).toArray();
+        res.send(result);
+    })
+
+    // get for delete
+    app.delete('/tutor/:id',async(req, res)=>{
+        const id = req.params.id;
+        const query = {_id: new ObjectId(id)};
+        const result = await tutorialCollection.deleteOne(query);
+        res.send(result);
+    })
+
+    // get a single data
+    app.get('/all-tutors/:id',async(req,res)=>{
+        const id = req.params.id;
+        console.log('single id',id)
+        const query = {_id: new ObjectId(id)};
+        const result = await tutorialCollection.findOne(query);
+        res.send(result);
+    })
+
+    // get for update 
+    app.put('/update-tutor/:id',async(req,res)=>{
+        const id = req.params.id;
+        const tutorData = req.body;
+        const update = {
+            $set: tutorData,
+        }
+        const query = {_id: new ObjectId(id)};
+        const options = {upsert: true};
+        const result = await tutorialCollection.updateOne(query,update,options);
         res.send(result);
     })
     
