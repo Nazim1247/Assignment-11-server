@@ -35,10 +35,8 @@ async function run() {
     // save book in the server
     app.post('/add-book',async(req,res)=>{
         const bookData = req.body;
-        // delete bookData._id
         const result = await bookCollection.insertOne(bookData);
         res.send(result)
-        // console.log(tutorData)
     })
 
     app.get('/books',async(req,res)=>{
@@ -50,10 +48,9 @@ async function run() {
     app.get('/books/:email',async(req,res)=>{
         const email = req.params.email;
         const query = {userEmail:email}
-        console.log(email)
+        
         const result = await bookCollection.find(query).toArray();
         res.send(result);
-        console.log(result)
     })
 
 
@@ -72,9 +69,9 @@ async function run() {
     })
 
     // get all tutorials posted by user
-    app.get('/tutor/:email',async(req,res)=>{
+    app.get('/all-tutors/:email',async(req,res)=>{
         const email = req.params.email;
-        const query = {'tutor.email': email};
+        const query = { email};
         const result = await tutorialCollection.find(query).toArray();
         res.send(result);
     })
@@ -88,9 +85,8 @@ async function run() {
     })
 
     // get a single data
-    app.get('/all-tutors/:id',async(req,res)=>{
+    app.get('/all-tutor/:id',async(req,res)=>{
         const id = req.params.id;
-        console.log('single id',id)
         const query = {_id: new ObjectId(id)};
         const result = await tutorialCollection.findOne(query);
         res.send(result);
