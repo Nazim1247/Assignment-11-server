@@ -35,12 +35,28 @@ async function run() {
     // save book in the server
     app.post('/add-book',async(req,res)=>{
         const bookData = req.body;
+        // delete bookData._id
         const result = await bookCollection.insertOne(bookData);
         res.send(result)
         // console.log(tutorData)
     })
 
-    
+    app.get('/books',async(req,res)=>{
+        const result = await bookCollection.find().toArray();
+        res.send(result)
+    })
+
+    // get all books for a specific user
+    app.get('/books/:email',async(req,res)=>{
+        const email = req.params.email;
+        const query = {userEmail:email}
+        console.log(email)
+        const result = await bookCollection.find(query).toArray();
+        res.send(result);
+        console.log(result)
+    })
+
+
     // save data in the server
     app.post('/tutorials',async(req,res)=>{
         const tutorData = req.body;
@@ -54,14 +70,6 @@ async function run() {
         const result = await tutorialCollection.find().toArray();
         res.send(result);
     })
-
-    // get for tutor details
-    // app.get('/tutor/:id',async(req,rse)=>{
-    //     const id = req.params.id;
-    //     const query = {_id: new ObjectId(id)};
-    //     const result = await tutorialCollection.findOne(query);
-    //     res.send(result);
-    // })
 
     // get all tutorials posted by user
     app.get('/tutor/:email',async(req,res)=>{
