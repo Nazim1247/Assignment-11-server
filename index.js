@@ -21,7 +21,7 @@ const logger = (req, res, next) => {
 }
 
 const verifyToken = (req, res, next) => {
-    console.log('inside the verify', req.cookies)
+    // console.log('inside the verify', req.cookies)
     const token = req?.cookies?.token;
 
     if (!token) {
@@ -62,7 +62,7 @@ async function run() {
         // jwt token related
         app.post('/jwt', async (req, res) => {
             const user = req.body;
-            const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
+            const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '5h' });
             res
                 .cookie('token', token, {
                     httpOnly: true,
@@ -70,6 +70,16 @@ async function run() {
                 })
                 .send({ success: true });
         })
+
+        app.post('/logout',async(req,res)=>{
+            res
+            .clearCookie('token',{
+                httpOnly: true,
+                secure: false
+            })
+            .send({ success: true });
+        })
+
 
         // save book in the server
         app.post('/add-book', async (req, res) => {
