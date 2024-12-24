@@ -15,10 +15,10 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-const logger = (req, res, next) => {
-    console.log('inside the api')
-    next();
-}
+// const logger = (req, res, next) => {
+//     console.log('inside the api')
+//     next();
+// }
 
 const verifyToken = (req, res, next) => {
     // console.log('inside the verify', req.cookies)
@@ -71,13 +71,13 @@ async function run() {
                 .send({ success: true });
         })
 
-        app.post('/logout',async(req,res)=>{
+        app.post('/logout', async (req, res) => {
             res
-            .clearCookie('token',{
-                httpOnly: true,
-                secure: false
-            })
-            .send({ success: true });
+                .clearCookie('token', {
+                    httpOnly: true,
+                    secure: false
+                })
+                .send({ success: true });
         })
 
 
@@ -110,21 +110,50 @@ async function run() {
             // console.log(tutorData)
         })
 
-        // get all tutors
-        app.get('/all-tutors', logger, async (req, res) => {
-            console.log('this is logger')
-            // console.log('token',req.cookies)
-            const result = await tutorialCollection.find().toArray();
+        // get tutor by category
+        app.get('/tutors/:language', async (req, res) => {
+            const language = req.params.language;
+            const query = { language: language };
+            const result = await tutorialCollection.find(query).toArray();
             res.send(result);
         })
+
+        // get all tutors
+        app.get('/all-tutors', async (req, res) => {
+            const filter = req.query.language;
+            // const {language} = req.query;
+            const search = req.query.search;
+            // console.log(search)
+            
+            let query = {
+                language: {
+                    $regex:search, $options: 'i'
+                }
+            }
+
+            if(filter) query.language = filter
+
+            // if(language){
+            //     query = {language: {$eq: language}}
+            // }
+
+            const result = await tutorialCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        // get all tutors
+        // app.get('/all-tutors', async (req, res) => {
+        //     const result = await tutorialCollection.find().toArray();
+        //     res.send(result);
+        // })
 
         // get all tutorials posted by user
         app.get('/all-tutors/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email };
 
-            if(req.user.email !== req.params.email){
-                return res.status(403).send({message: 'forbidden access'})
+            if (req.user.email !== req.params.email) {
+                return res.status(403).send({ message: 'forbidden access' })
             }
             const result = await tutorialCollection.find(query).toArray();
             res.send(result);
