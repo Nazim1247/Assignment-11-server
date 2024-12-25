@@ -66,7 +66,7 @@ async function run() {
             res
                 .cookie('token', token, {
                     httpOnly: true,
-                    secure: false, // http://localhost:5173/login
+                    secure: false,
                 })
                 .send({ success: true });
         })
@@ -85,6 +85,14 @@ async function run() {
         app.post('/add-book', async (req, res) => {
             const bookData = req.body;
             const result = await bookCollection.insertOne(bookData);
+
+            const filter = {_id: new ObjectId(bookData.tutorId)}
+            // console.log(filter)
+            const update = {
+                $inc: {review: 1},
+            }
+            const updateReview = await tutorialCollection.updateOne(filter, update);
+
             res.send(result)
         })
 
@@ -107,23 +115,13 @@ async function run() {
             const tutorData = req.body;
             const result = await tutorialCollection.insertOne(tutorData);
             res.send(result)
-            // console.log(tutorData)
-        })
-
-        // get tutor by category
-        app.get('/tutors/:language', async (req, res) => {
-            const language = req.params.language;
-            const query = { language: language };
-            const result = await tutorialCollection.find(query).toArray();
-            res.send(result);
         })
 
         // get all tutors
-        app.get('/all-tutors', async (req, res) => {
+        app.get('/tutors', async (req, res) => {
+            
             const filter = req.query.language;
-            // const {language} = req.query;
             const search = req.query.search;
-            // console.log(search)
             
             let query = {
                 language: {
@@ -133,19 +131,9 @@ async function run() {
 
             if(filter) query.language = filter
 
-            // if(language){
-            //     query = {language: {$eq: language}}
-            // }
-
             const result = await tutorialCollection.find(query).toArray();
             res.send(result);
         })
-
-        // get all tutors
-        // app.get('/all-tutors', async (req, res) => {
-        //     const result = await tutorialCollection.find().toArray();
-        //     res.send(result);
-        // })
 
         // get all tutorials posted by user
         app.get('/all-tutors/:email', verifyToken, async (req, res) => {
