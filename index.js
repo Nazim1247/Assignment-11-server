@@ -58,6 +58,19 @@ async function run() {
         const db = client.db('tutorial-db')
         const tutorialCollection = db.collection('tutor')
         const bookCollection = db.collection('book')
+        const userCollection = db.collection('users')
+
+        // users related apis
+        app.post('/users',async(req,res)=>{
+            const usersData = req.body;
+            const result = await userCollection.insertOne(usersData);
+            res.send(result);
+        })
+
+        app.get('/all-users',async(req,res)=>{
+            const result = await userCollection.find().toArray();
+            res.send(result);
+        })
 
         // jwt token related
         app.post('/jwt', async (req, res) => {
@@ -86,19 +99,57 @@ async function run() {
             const bookData = req.body;
             const result = await bookCollection.insertOne(bookData);
 
-            const filter = {_id: new ObjectId(bookData.tutorId)}
+            // const filter = {_id: new ObjectId(bookData.tutorId)}
             // console.log(filter)
-            const update = {
-                $inc: {review: 1},
-            }
-            const updateReview = await tutorialCollection.updateOne(filter, update);
+            // const update = {
+            //     $inc: {review: 1},
+            // }
+            // const updateReview = await tutorialCollection.updateOne(filter, update);
 
             res.send(result)
         })
 
-        app.get('/books', async (req, res) => {
-            const result = await bookCollection.find().toArray();
-            res.send(result)
+        // get all books
+        // app.get('/books/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = {_id: new ObjectId(id)};
+        //     const result = await bookCollection.findOne(query);
+        //     res.send(result)
+        // })
+
+        // update book
+        app.put('/update-book/:tutorId', async (req, res) => {
+            const id = req.params.tutorId;
+            // const bookData = req.body;
+            const filter = {_id: new ObjectId(id)}
+            const update = {
+                $inc: {review: 1},
+            }
+            // console.log( id)
+
+            // try {
+            //     const result = await tutorialCollection.updateOne(
+            //         { _id: new ObjectId(id) },
+            //         { $inc: { review: 1 } }
+            //     )
+            //     console.log(review)
+            //     if (result.modifiedCount === 0) {
+            //         return res.status(404).json({ error: "Tutor not found" });
+            //       }
+            // } catch (err) {
+            //     console.log(err)
+            // }
+            
+            // console.log(bookData)
+            // const update = {
+            //     $inc: {review: 1},
+            // }
+            // const query = { _id: new ObjectId(id) };
+            // const options = { upsert: true };
+            // const result = await bookCollection.updateOne(query, update, options);
+
+            const result = await tutorialCollection.updateOne(filter, update)
+            res.send(result);
         })
 
         // get all books for a specific user
@@ -117,19 +168,25 @@ async function run() {
             res.send(result)
         })
 
+        // get all tutor 
+        app.get('/all-tutors',async(req,res)=>{
+            const result = await tutorialCollection.find().toArray();
+            res.send(result);
+        })
+
         // get all tutors
         app.get('/tutors', async (req, res) => {
-            
+
             const filter = req.query.language;
             const search = req.query.search;
-            
+
             let query = {
                 language: {
-                    $regex:search, $options: 'i'
+                    $regex: search, $options: 'i'
                 }
             }
 
-            if(filter) query.language = filter
+            if (filter) query.language = filter
 
             const result = await tutorialCollection.find(query).toArray();
             res.send(result);
