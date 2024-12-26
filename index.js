@@ -57,7 +57,7 @@ async function run() {
         const tutorialCollection = db.collection('tutor')
         const bookCollection = db.collection('book')
         const userCollection = db.collection('users')
-
+        
         // users related apis
         app.post('/users', async (req, res) => {
             const usersData = req.body;
