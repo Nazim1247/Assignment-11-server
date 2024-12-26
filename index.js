@@ -15,13 +15,8 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 
-// const logger = (req, res, next) => {
-//     console.log('inside the api')
-//     next();
-// }
-
+// verify token
 const verifyToken = (req, res, next) => {
-    // console.log('inside the verify', req.cookies)
     const token = req?.cookies?.token;
 
     if (!token) {
@@ -50,9 +45,9 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
         const db = client.db('tutorial-db')
@@ -94,60 +89,20 @@ async function run() {
         })
 
 
-        // save book in the server
+        // book related apis: save book in the server
         app.post('/add-book', async (req, res) => {
             const bookData = req.body;
             const result = await bookCollection.insertOne(bookData);
-
-            // const filter = {_id: new ObjectId(bookData.tutorId)}
-            // console.log(filter)
-            // const update = {
-            //     $inc: {review: 1},
-            // }
-            // const updateReview = await tutorialCollection.updateOne(filter, update);
-
             res.send(result)
         })
-
-        // get all books
-        // app.get('/books/:id', async (req, res) => {
-        //     const id = req.params.id;
-        //     const query = {_id: new ObjectId(id)};
-        //     const result = await bookCollection.findOne(query);
-        //     res.send(result)
-        // })
 
         // update book
         app.put('/update-book/:tutorId', async (req, res) => {
             const id = req.params.tutorId;
-            // const bookData = req.body;
             const filter = {_id: new ObjectId(id)}
             const update = {
                 $inc: {review: 1},
             }
-            // console.log( id)
-
-            // try {
-            //     const result = await tutorialCollection.updateOne(
-            //         { _id: new ObjectId(id) },
-            //         { $inc: { review: 1 } }
-            //     )
-            //     console.log(review)
-            //     if (result.modifiedCount === 0) {
-            //         return res.status(404).json({ error: "Tutor not found" });
-            //       }
-            // } catch (err) {
-            //     console.log(err)
-            // }
-            
-            // console.log(bookData)
-            // const update = {
-            //     $inc: {review: 1},
-            // }
-            // const query = { _id: new ObjectId(id) };
-            // const options = { upsert: true };
-            // const result = await bookCollection.updateOne(query, update, options);
-
             const result = await tutorialCollection.updateOne(filter, update)
             res.send(result);
         })
@@ -160,8 +115,7 @@ async function run() {
             res.send(result);
         })
 
-
-        // save data in the server
+        // tutor related apis: save data in the server
         app.post('/tutorials', async (req, res) => {
             const tutorData = req.body;
             const result = await tutorialCollection.insertOne(tutorData);
@@ -174,7 +128,7 @@ async function run() {
             res.send(result);
         })
 
-        // get all tutors
+        // get all tutors for find tutor page
         app.get('/tutors', async (req, res) => {
 
             const filter = req.query.language;
@@ -192,7 +146,7 @@ async function run() {
             res.send(result);
         })
 
-        // get all tutorials posted by user
+        // get all tutorials posted by a user
         app.get('/all-tutors/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email };
@@ -220,7 +174,7 @@ async function run() {
             res.send(result);
         })
 
-        // get for update 
+        // put for update 
         app.put('/update-tutor/:id', async (req, res) => {
             const id = req.params.id;
             const tutorData = req.body;
