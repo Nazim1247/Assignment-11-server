@@ -9,7 +9,10 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 // middleware
 app.use(cors({
-    origin: ['http://localhost:5173'],
+    origin: ['http://localhost:5173',
+        'https://assignment-11-6b184.web.app',
+        'https://assignment-11-6b184.firebaseapp.com'
+    ],
     credentials: true
 }));
 app.use(express.json());
@@ -56,13 +59,13 @@ async function run() {
         const userCollection = db.collection('users')
 
         // users related apis
-        app.post('/users',async(req,res)=>{
+        app.post('/users', async (req, res) => {
             const usersData = req.body;
             const result = await userCollection.insertOne(usersData);
             res.send(result);
         })
 
-        app.get('/all-users',async(req,res)=>{
+        app.get('/all-users', async (req, res) => {
             const result = await userCollection.find().toArray();
             res.send(result);
         })
@@ -74,7 +77,8 @@ async function run() {
             res
                 .cookie('token', token, {
                     httpOnly: true,
-                    secure: false,
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
                 })
                 .send({ success: true });
         })
@@ -83,7 +87,8 @@ async function run() {
             res
                 .clearCookie('token', {
                     httpOnly: true,
-                    secure: false
+                    secure: process.env.NODE_ENV === "production",
+                    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
                 })
                 .send({ success: true });
         })
@@ -99,9 +104,9 @@ async function run() {
         // update book
         app.put('/update-book/:tutorId', async (req, res) => {
             const id = req.params.tutorId;
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const update = {
-                $inc: {review: 1},
+                $inc: { review: 1 },
             }
             const result = await tutorialCollection.updateOne(filter, update)
             res.send(result);
@@ -123,7 +128,7 @@ async function run() {
         })
 
         // get all tutor 
-        app.get('/all-tutors',async(req,res)=>{
+        app.get('/all-tutors', async (req, res) => {
             const result = await tutorialCollection.find().toArray();
             res.send(result);
         })
