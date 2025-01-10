@@ -10,6 +10,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 // middleware
 app.use(cors({
     origin: ['http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:5175',
         'https://assignment-11-6b184.web.app',
         'https://assignment-11-6b184.firebaseapp.com'
     ],
@@ -116,8 +118,6 @@ async function run() {
         app.get('/books/:email', async (req, res) => {
             const email = req.params.email;
             const query = { userEmail: email };
-
-
             const result = await bookCollection.find(query).toArray();
             res.send(result);
         })
@@ -129,9 +129,15 @@ async function run() {
             res.send(result)
         })
 
-        // get all tutor 
+        // get all tutors 
         app.get('/all-tutors', async (req, res) => {
             const result = await tutorialCollection.find().toArray();
+            res.send(result);
+        })
+
+        // get sorted tutors 
+        app.get('/sorted-tutors', async (req, res) => {
+            const result = await tutorialCollection.find().sort({price: -1}).toArray();
             res.send(result);
         })
 
